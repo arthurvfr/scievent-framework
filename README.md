@@ -59,7 +59,7 @@ Cada microsserviço é um processo Flask independente, com seu próprio banco (*
 ### 2. Obter o código
 
 ```bash
-git clone https://github.com/<seu-usuario>/scievent-framework.git
+git clone https://github.com/arthurvfr/scievent-framework.git
 cd scievent-framework
 ```
 
@@ -159,7 +159,11 @@ O topo de toda tela mostra **"Microsserviços usados nesta tela"**, com os servi
 
 ## O framework: template methods e hotspots
 
-A classe `FrameworkEventoCientifico` (`scievent/framework.py`) é o controle do framework.
+A classe `FrameworkEventoCientifico` (`scievent/framework.py`) é o controle do framework: é a **parte invariante**, e cada aplicação (subclasse) fornece a **parte variante** implementando os hot-spots. Há **inversão de controle**: quem chama o código da aplicação é o framework, dentro dos métodos template.
+
+![Diagrama de classes do framework com os componentes](docs/img/diagrama-01-framework-componentes.png)
+
+O diagrama acima segue o formato da figura 12 do artigo *Framework para Pagamentos na Web*: a classe do framework guarda um atributo para cada componente, tipado pela interface, e cada componente implementa a sua interface. Ele é gerado por `python docs/diagramas/gerar_diagrama_01.py` (requer Graphviz); os demais diagramas estão em Mermaid na mesma pasta.
 
 **Template methods (frozen spots — fluxo fixo, não sobrescrever):**
 
