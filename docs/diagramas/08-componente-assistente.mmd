@@ -1,0 +1,67 @@
+classDiagram
+    direction TB
+    class Componente {
+        <<abstract>>
+        +nome : str
+        +descricao()* str
+    }
+    class IAssistente {
+        <<interface>>
+        +triar(submissao, evento)* dict
+        +meta_revisao(submissao, revisoes, decisao, evento)* str
+    }
+    class AssistenteAgentes {
+        -cliente : ClienteAgentes
+        +descricao() str
+        +triar(submissao, evento) dict
+        +meta_revisao(submissao, revisoes, decisao, evento) str
+    }
+    class SemAssistente {
+        <<Null Object>>
+        +descricao() str
+        +triar(submissao, evento) None
+        +meta_revisao(...) None
+    }
+    class ClienteAgentes {
+        +triagem(evento, submissao) dict
+        +meta_revisao(evento, submissao, revisoes, decisao) dict
+        +pool(evento_id) list
+        +papeis() list
+    }
+    class PoolDeMensagens {
+        <<microsserviço agentes>>
+        +assinar(agente)
+        +publicar(evento_id, tipo, origem, conteudo) list
+        +listar(evento_id) list
+    }
+    class Agente {
+        <<abstract>>
+        +nome : str
+        +papel : str
+        +objetivo : str
+        +restricoes : str
+        +interesses : set
+        +produz : str
+        +agir(conteudo) dict
+        +heuristica(conteudo)* dict
+    }
+    class AgenteTriagem
+    class AgenteMetaRevisor
+    class IModeloLinguagem {
+        <<interface>>
+        +responder_json(sistema, usuario)* dict
+    }
+    class FrameworkEventoCientifico {
+        <<abstract>>
+        +criar_assistente() IAssistente
+    }
+    Componente <|-- IAssistente
+    IAssistente <|.. AssistenteAgentes
+    IAssistente <|.. SemAssistente
+    AssistenteAgentes --> ClienteAgentes : HTTP
+    ClienteAgentes ..> PoolDeMensagens : POST /triagem, /meta-revisao
+    PoolDeMensagens o-- "*" Agente : assinantes
+    Agente <|-- AgenteTriagem
+    Agente <|-- AgenteMetaRevisor
+    Agente --> IModeloLinguagem
+    FrameworkEventoCientifico o-- IAssistente : gancho

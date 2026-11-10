@@ -1,0 +1,48 @@
+classDiagram
+    direction TB
+    class Componente {
+        <<abstract>>
+        +nome : str
+        +descricao()* str
+    }
+    class IFormularioAvaliacao {
+        <<interface>>
+        +criterios()* list~Criterio~
+        +validar(respostas: dict, comentario: str)* list~str~
+        +calcular_nota(respostas: dict)* float
+    }
+    class FormularioPonderado {
+        -_criterios : list~Criterio~
+        -comentario_minimo : int
+        +descricao() str
+        +criterios() list~Criterio~
+        +validar(respostas, comentario) list~str~
+        +calcular_nota(respostas) float
+    }
+    class FormularioNotaUnica {
+        -_criterio : Criterio
+        -comentario_minimo : int
+        +descricao() str
+        +criterios() list~Criterio~
+        +validar(respostas, comentario) list~str~
+        +calcular_nota(respostas) float
+    }
+    class Criterio {
+        +chave : str
+        +rotulo : str
+        +peso : float
+        +minimo : int
+        +maximo : int
+        +ajuda : str
+    }
+    class FrameworkEventoCientifico {
+        <<abstract>>
+        +criar_formulario_avaliacao()* IFormularioAvaliacao
+        +registrar_revisao(alocacao_id, respostas, comentario) ResultadoRevisao
+    }
+    Componente <|-- IFormularioAvaliacao
+    IFormularioAvaliacao <|.. FormularioPonderado
+    IFormularioAvaliacao <|.. FormularioNotaUnica
+    FormularioPonderado o-- "1..*" Criterio
+    FormularioNotaUnica o-- "1" Criterio
+    FrameworkEventoCientifico o-- IFormularioAvaliacao : hotspot

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block titulo %}{{ evento.sigla }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div>
+    <span class="etiqueta">Visão geral</span>
+    <h1>{{ evento.nome }}</h1>
+    <p class="mudo">{{ evento.descricao }} · {{ evento.local }} · {{ evento.data_inicio }}</p>
+  </div>
+  <div class="acoes">
+    {% if m.submissoes == 0 %}
+    <form method="post" action="{{ url_for('popular', app_id=app_id) }}"><button class="botao">Carregar dados de exemplo</button></form>
+    {% endif %}
+    <form method="post" action="{{ url_for('ciclo_completo', app_id=app_id) }}">
+      <button class="botao botao-secundario" {% if m.submissoes == 0 %}disabled{% endif %}>Executar ciclo completo (demonstração)</button>
+    </form>
+  </div>
+</div>
+
+<div class="metricas">
+  <div class="metrica"><b>{{ m.submissoes }}</b><span>submissões</span></div>
+  <div class="metrica"><b>{{ m.revisores }}</b><span>revisores</span></div>
+  <div class="metrica"><b>{{ m.alocacoes }}</b><span>alocações ({{ m.revisoes_pendentes }} pendentes)</span></div>
+  <div class="metrica"><b>{{ m.por_status.get('aceito', 0) }}</b><span>aceitos</span></div>
+  <div class="metrica"><b>{{ m.notificacoes }}</b><span>notificações</span></div>
+  <div class="metrica"><b>{{ 'sim' if m.programacao else 'não' }}</b><span>programação publicada</span></div>
+</div>
+
+<div class="grade-2">
+  <section class="cartao">
+    <h2>Componentes plugados nos hotspots</h2>
+    <p class="mudo pequeno">Gravados no microsserviço <code>eventos</code> quando a aplicação foi inicializada.</p>
+    <table class="tabela">
+      <thead><tr><th>Hotspot</th><th>Componente</th><th>Regra</th></tr></thead>
+      <tbody>
+      {% for c in evento.componentes %}
+        <tr><td>{{ c.hotspot }}</td><td><code>{{ c.componente }}</code></td><td class="pequeno">{{ c.descricao }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="cartao">
+    <h2>Fluxo do framework (template methods)</h2>
+    <ol class="fluxo">
+      <li><code>submeter_trabalho()</code><span>{{ m.submissoes }} recebidas</span></li>
+      <li><code>alocar_revisores()</code><span>{{ m.alocacoes }} alocações</span></li>
+      <li><code>registrar_revisao()</code><span>{{ m.alocacoes - m.revisoes_pendentes }} revisões entregues</span></li>
+      <li><code>consolidar_decisoes()</code><span>{{ m.por_status.get('aceito', 0) }} aceitos · {{ m.por_status.get('rejeitado', 0) }} rejeitados</span></li>
+      <li><code>gerar_programacao()</code><span>{{ 'publicada' if m.programacao else 'pendente' }}</span></li>
+    </ol>
+    <h3>Trilhas</h3>
+    <div class="chips">{% for t in evento.trilhas %}<span class="chip">{{ t.nome }}</span>{% endfor %}</div>
+  </section>
+</div>
+{% endblock %}

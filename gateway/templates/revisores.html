@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block titulo %}Revisores · {{ evento.sigla }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div>
+    <span class="etiqueta">Template method <code>alocar_revisores()</code></span>
+    <h1>Revisores e alocação</h1>
+    <p class="mudo">Estratégia deste evento (componente <code>{{ aplicacao.alocacao.nome }}</code>): {{ aplicacao.alocacao.descricao() }}.</p>
+  </div>
+  <form method="post" action="{{ url_for('alocar', app_id=app_id) }}">
+    <button class="botao" {% if not aguardando or not revisores %}disabled{% endif %}>Alocar revisores ({{ aguardando }} aguardando)</button>
+  </form>
+</div>
+
+<div class="grade-2 grade-assimetrica">
+  <section class="cartao">
+    <h2>Comitê de revisores</h2>
+    <table class="tabela">
+      <thead><tr><th>Revisor</th><th>Instituição</th><th>Áreas</th><th>Carga</th></tr></thead>
+      <tbody>
+      {% for r in revisores %}
+        <tr><td><strong>{{ r.nome }}</strong><br><span class="mudo pequeno">{{ r.email }}</span></td>
+            <td>{{ r.instituicao }}</td>
+            <td class="pequeno">{{ r.areas|join(', ') }}</td>
+            <td>{{ carga.get(r.id, 0) }}</td></tr>
+      {% else %}<tr><td colspan="4" class="mudo">Nenhum revisor cadastrado.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="cartao">
+    <h2>Cadastrar revisor</h2>
+    <form method="post" action="{{ url_for('cadastrar_revisor', app_id=app_id) }}" class="formulario">
+      <input name="nome" placeholder="Nome" required>
+      <input name="email" placeholder="E-mail" type="email" required>
+      <input name="instituicao" placeholder="Instituição">
+      <input name="palavras_chave" placeholder="Palavras-chave (vírgula)">
+      <div class="chips">
+        {% for t in evento.trilhas %}<label class="chip-check"><input type="checkbox" name="areas" value="{{ t.nome }}">{{ t.nome }}</label>{% endfor %}
+      </div>
+      <button class="botao botao-secundario">Cadastrar</button>
+    </form>
+  </section>
+</div>
+
+<section class="cartao">
+  <h2>Alocações</h2>
+  {% if por_submissao %}
+  <table class="tabela">
+    <thead><tr><th>Trabalho</th><th>Revisores alocados (afinidade)</th></tr></thead>
+    <tbody>
+    {% for sub_id, alocs in por_submissao.items() %}
+      <tr><td><strong>#{{ sub_id }}</strong> {{ submissoes[sub_id].titulo }}
+              <br><span class="pequeno mudo">{{ submissoes[sub_id].trilha }} · autores de {{ submissoes[sub_id].autores|map(attribute='instituicao')|unique|join(', ') }}</span></td>
+          <td>{% for a in alocs %}<span class="chip">{{ a.revisor_nome }} <b>{{ a.afinidade }}</b>{% if a.status == 'concluida' %} ✓{% endif %}</span>{% endfor %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="mudo">Nenhuma alocação ainda.</p>{% endif %}
+</section>
+{% endblock %}

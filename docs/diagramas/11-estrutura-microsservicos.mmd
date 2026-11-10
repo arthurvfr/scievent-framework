@@ -1,0 +1,60 @@
+classDiagram
+    direction TB
+    class chassi {
+        <<módulo scievent.chassi>>
+        +criar_microsservico(nome, descricao) Flask
+        +iniciar(app, registrar)
+        +corpo_json() dict
+        -_enviar_heartbeats(nome, porta, descricao)
+    }
+    class BancoSQLite {
+        +caminho : str
+        +consultar(sql, parametros) list~dict~
+        +executar(sql, parametros) int
+    }
+    class ErroNegocio {
+        +status : int
+    }
+    class IEventoRepositorio {
+        <<interface>>
+        +criar(dados)* dict
+        +obter(evento_id)* dict
+        +listar(aplicacao)* list
+    }
+    class ISubmissaoRepositorio {
+        <<interface>>
+        +criar(dados)* dict
+        +obter(submissao_id)* dict
+        +listar(evento_id, status)* list
+        +atualizar(submissao_id, campos)* dict
+    }
+    class IRevisaoRepositorio {
+        <<interface>>
+        +criar_revisor(dados)* dict
+        +listar_revisores(evento_id)* list
+        +criar_alocacoes(evento_id, pares)* list
+        +listar_alocacoes(filtros)* list
+        +registrar_revisao(dados)* dict
+        +listar_revisoes(filtros)* list
+    }
+    class IProgramacaoRepositorio {
+        <<interface>>
+        +salvar(evento_id, programa)* dict
+        +obter(evento_id)* dict
+    }
+    class INotificacaoRepositorio {
+        <<interface>>
+        +registrar(dados)* dict
+        +listar(evento_id)* list
+    }
+    IEventoRepositorio <|.. EventoRepositorioSQLite
+    ISubmissaoRepositorio <|.. SubmissaoRepositorioSQLite
+    IRevisaoRepositorio <|.. RevisaoRepositorioSQLite
+    IProgramacaoRepositorio <|.. ProgramacaoRepositorioSQLite
+    INotificacaoRepositorio <|.. NotificacaoRepositorioSQLite
+    EventoRepositorioSQLite --> BancoSQLite
+    SubmissaoRepositorioSQLite --> BancoSQLite
+    RevisaoRepositorioSQLite --> BancoSQLite
+    ProgramacaoRepositorioSQLite --> BancoSQLite
+    NotificacaoRepositorioSQLite --> BancoSQLite
+    chassi ..> ErroNegocio

@@ -1,0 +1,67 @@
+classDiagram
+    direction TB
+    class Componente {
+        <<abstract>>
+        +nome : str
+        +descricao()* str
+    }
+    class IGeradorProgramacao {
+        <<interface>>
+        +gerar(aceitos: list, evento: dict, tentativa: int)* Programa
+        +verificar_conflitos(programa: Programa)* list~str~
+    }
+    class ProgramacaoPorTrilhas {
+        -salas : list~str~
+        -artigos_por_sessao : int
+        -duracao : int
+        -inicio : str
+        -intervalo : int
+        -sala_posteres : str
+        +descricao() str
+        +gerar(aceitos, evento, tentativa) Programa
+        +verificar_conflitos(programa) list~str~
+    }
+    class ProgramacaoSequencial {
+        -sala : str
+        -duracao : int
+        -inicio : str
+        -por_bloco : int
+        -intervalo : int
+        -limite : str
+        +descricao() str
+        +gerar(aceitos, evento, tentativa) Programa
+        +verificar_conflitos(programa) list~str~
+    }
+    class Programa {
+        +sessoes : list~Sessao~
+        +observacoes : list~str~
+        +como_dict() dict
+    }
+    class Sessao {
+        +titulo : str
+        +sala : str
+        +inicio : str
+        +fim : str
+        +trilha : str
+    }
+    class Apresentacao {
+        +submissao_id : int
+        +titulo : str
+        +autores : str
+        +autores_emails : list~str~
+        +inicio : str
+        +fim : str
+    }
+    class FrameworkEventoCientifico {
+        <<abstract>>
+        +MAX_TENTATIVAS_PROGRAMACAO : int
+        +criar_gerador_programacao()* IGeradorProgramacao
+        +gerar_programacao() dict
+    }
+    Componente <|-- IGeradorProgramacao
+    IGeradorProgramacao <|.. ProgramacaoPorTrilhas
+    IGeradorProgramacao <|.. ProgramacaoSequencial
+    IGeradorProgramacao ..> Programa : gera
+    Programa *-- "0..*" Sessao
+    Sessao *-- "0..*" Apresentacao
+    FrameworkEventoCientifico o-- IGeradorProgramacao : hotspot

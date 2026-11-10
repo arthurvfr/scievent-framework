@@ -1,0 +1,50 @@
+flowchart LR
+    U(["Navegador / cliente da API"])
+
+    subgraph GW["gateway · porta 5000"]
+        direction TB
+        UI["Interface web (Flask + Jinja)"]
+        PX["Proxy /api/&lt;servico&gt;/..."]
+        APPS["Aplicações: CongressoNacional, JornadaIniciacaoCientifica<br/>(subclasses de FrameworkEventoCientifico)"]
+        CL["ServicosSciEvent<br/>(clientes HTTP)"]
+        UI --> APPS --> CL
+    end
+
+    REG[["registro · porta 5010<br/>Service Registry"]]
+
+    subgraph MS1["eventos · 5001"]
+        direction LR
+        C1["Controlador"] --> R1["IEventoRepositorio"] --> D1[("eventos.db")]
+    end
+    subgraph MS2["submissoes · 5002"]
+        direction LR
+        C2["Controlador"] --> R2["ISubmissaoRepositorio"] --> D2[("submissoes.db")]
+    end
+    subgraph MS3["revisoes · 5003"]
+        direction LR
+        C3["Controlador"] --> R3["IRevisaoRepositorio"] --> D3[("revisoes.db")]
+    end
+    subgraph MS4["programacao · 5004"]
+        direction LR
+        C4["Controlador"] --> R4["IProgramacaoRepositorio"] --> D4[("programacao.db")]
+    end
+    subgraph MS5["notificacoes · 5005"]
+        direction LR
+        C5["Controlador"] --> R5["INotificacaoRepositorio"] --> D5[("notificacoes.db")]
+    end
+    subgraph MS6["agentes · 5006 (opcional)"]
+        direction LR
+        C6["Controlador"] --> P6["PoolDeMensagens<br/>AgenteTriagem · AgenteMetaRevisor"] --> D6[("agentes.db")]
+        P6 -.-> LLM(["LLM compatível OpenAI<br/>(opcional)"])
+    end
+
+    U -->|HTTP :5000| GW
+    CL -->|descobre endereços| REG
+    PX -->|descobre endereços| REG
+    CL -->|REST/JSON| MS1
+    CL -->|REST/JSON| MS2
+    CL -->|REST/JSON| MS3
+    CL -->|REST/JSON| MS4
+    CL -->|REST/JSON| MS5
+    CL -->|REST/JSON| MS6
+    MS1 & MS2 & MS3 & MS4 & MS5 & MS6 -. heartbeat 5 s .-> REG

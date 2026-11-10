@@ -1,0 +1,32 @@
+classDiagram
+    direction TB
+    class Componente {
+        <<abstract>>
+        +nome : str
+        +descricao()* str
+    }
+    class IEstrategiaAlocacao {
+        <<interface>>
+        +alocar(submissoes: list, revisores: list, carga_atual: dict)* list~dict~
+    }
+    class AlocacaoPorAfinidade {
+        -n : int
+        -evitar_mesma_instituicao : bool
+        +descricao() str
+        +afinidade(submissao, revisor)$ int
+        +alocar(submissoes, revisores, carga_atual) list~dict~
+    }
+    class AlocacaoRoundRobin {
+        -n : int
+        +descricao() str
+        +alocar(submissoes, revisores, carga_atual) list~dict~
+    }
+    class FrameworkEventoCientifico {
+        <<abstract>>
+        +criar_estrategia_alocacao()* IEstrategiaAlocacao
+        +alocar_revisores() list
+    }
+    Componente <|-- IEstrategiaAlocacao
+    IEstrategiaAlocacao <|.. AlocacaoPorAfinidade
+    IEstrategiaAlocacao <|.. AlocacaoRoundRobin
+    FrameworkEventoCientifico o-- IEstrategiaAlocacao : hotspot

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titulo %}Serviço indisponível{% endblock %}
+{% block conteudo %}
+<section class="cartao">
+  <h1>Um microsserviço não respondeu</h1>
+  <div class="aviso aviso-erro"><strong>{{ erro.servico }}</strong>: {{ erro.mensagem }}</div>
+  <p>Confira se todos os processos estão rodando (<code>python iniciar.py</code>) e veja a tela
+     <a href="{{ url_for('microservicos') }}">Microsserviços</a>.</p>
+</section>
+{% endblock %}

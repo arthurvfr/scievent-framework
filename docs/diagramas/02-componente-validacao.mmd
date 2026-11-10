@@ -1,0 +1,40 @@
+classDiagram
+    direction TB
+    class Componente {
+        <<abstract>>
+        +nome : str
+        +descricao()* str
+    }
+    class IValidadorSubmissao {
+        <<interface>>
+        +validar(submissao: dict, evento: dict)* list~str~
+    }
+    class ValidadorRigoroso {
+        -min_palavras : int
+        -max_palavras : int
+        -min_kw : int
+        -max_kw : int
+        -max_autores : int
+        +descricao() str
+        +validar(submissao, evento) list~str~
+    }
+    class ValidadorSimples {
+        -max_palavras : int
+        +descricao() str
+        +validar(submissao, evento) list~str~
+    }
+    class FrameworkEventoCientifico {
+        <<abstract>>
+        +criar_validador()* IValidadorSubmissao
+        +submeter_trabalho(dados) ResultadoSubmissao
+    }
+    class ResultadoSubmissao {
+        +aceita : bool
+        +erros : list~str~
+        +submissao : dict
+    }
+    Componente <|-- IValidadorSubmissao
+    IValidadorSubmissao <|.. ValidadorRigoroso
+    IValidadorSubmissao <|.. ValidadorSimples
+    FrameworkEventoCientifico o-- IValidadorSubmissao : hotspot
+    FrameworkEventoCientifico ..> ResultadoSubmissao : cria

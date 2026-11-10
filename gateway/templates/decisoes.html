@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Decisões · {{ evento.sigla }}{% endblock %}
+{% block conteudo %}
+{% set em_revisao = submissoes|selectattr('status', 'equalto', 'em_revisao')|list %}
+<div class="cabecalho-pagina">
+  <div>
+    <span class="etiqueta">Template method <code>consolidar_decisoes()</code></span>
+    <h1>Decisões</h1>
+    <p class="mudo">Política deste evento (componente <code>{{ aplicacao.politica_decisao.nome }}</code>): {{ aplicacao.politica_decisao.descricao() }}.</p>
+  </div>
+  <form method="post" action="{{ url_for('consolidar', app_id=app_id) }}">
+    <button class="botao" {% if not em_revisao %}disabled{% endif %}>Consolidar decisões ({{ em_revisao|length }} em revisão)</button>
+  </form>
+</div>
+
+<table class="tabela">
+  <thead><tr><th>Trabalho</th><th>Revisões</th><th>Média</th><th>Resultado</th><th>Justificativa e parecer</th></tr></thead>
+  <tbody>
+  {% for s in submissoes if s.status in ('aceito', 'rejeitado', 'em_revisao') %}
+    <tr>
+      <td><strong>#{{ s.id }}</strong> {{ s.titulo }}<br><span class="pequeno mudo">{{ s.trilha }}</span></td>
+      <td>{{ revisoes_por_sub.get(s.id, 0) }}</td>
+      <td>{{ '%.2f'|format(s.decisao.media) if s.decisao else '—' }}</td>
+      <td><span class="selo selo-{{ s.status }}">{{ s.status|status }}</span>
+          {% if s.decisao and s.decisao.modalidade %}<br><span class="pequeno">{{ s.decisao.modalidade|modalidade }}</span>{% endif %}</td>
+      <td class="pequeno">
+        {% if s.decisao %}{{ s.decisao.justificativa }}{% else %}<span class="mudo">aguardando revisões</span>{% endif %}
+        {% if s.parecer %}<div class="parecer-ia"><b>Meta-revisão (agente):</b> {{ s.parecer }}</div>{% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="mudo">Nenhum trabalho em revisão ainda.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

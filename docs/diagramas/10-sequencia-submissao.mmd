@@ -1,0 +1,31 @@
+sequenceDiagram
+    autonumber
+    actor A as Autor
+    participant G as gateway :5000
+    participant F as CongressoNacional<br/>(template method)
+    participant V as ValidadorRigoroso<br/>(hotspot)
+    participant S as submissoes :5002
+    participant AG as agentes :5006
+    participant N as NotificacaoEmail<br/>(hotspot)
+    participant NS as notificacoes :5005
+
+    A->>G: POST /a/congresso/submeter
+    G->>F: submeter_trabalho(dados)
+    F->>F: _normalizar_submissao()
+    F->>V: validar(submissao, evento)
+    V-->>F: lista de erros
+    alt há erros
+        F-->>G: ResultadoSubmissao(aceita=False, erros)
+        G-->>A: formulário com os erros
+    else submissão válida
+        F->>S: POST /submissoes
+        S-->>F: submissão #id
+        F->>AG: POST /triagem (via AssistenteAgentes)
+        AG-->>F: trilha sugerida, alertas
+        F->>S: PATCH /submissoes/id (triagem)
+        F->>N: formatar("submissao_recebida", contexto)
+        N-->>F: Mensagem(assunto, corpo)
+        F->>NS: POST /notificacoes
+        F-->>G: ResultadoSubmissao(aceita=True)
+        G-->>A: redireciona para Trabalhos
+    end

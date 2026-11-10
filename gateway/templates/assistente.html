@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block titulo %}Assistente de IA · {{ evento.sigla }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div>
+    <span class="etiqueta">Gancho <code>criar_assistente()</code></span>
+    <h1>Assistente de IA</h1>
+    <p class="mudo">Componente desta aplicação: <code>{{ aplicacao.assistente.nome }}</code> — {{ aplicacao.assistente.descricao() }}.</p>
+  </div>
+</div>
+
+{% if not usa_ia %}
+  <section class="cartao">
+    <h2>Hotspot de IA desligado</h2>
+    <p>Esta aplicação não sobrescreve o gancho <code>criar_assistente()</code>, então o framework usa o
+       componente padrão <code>SemAssistente</code> (padrão Null Object). O fluxo de submissão e de decisão
+       segue normalmente, sem triagem nem meta-revisão, e o microsserviço <code>agentes</code> não é chamado.</p>
+  </section>
+{% else %}
+  <p class="mudo">Modelo de linguagem: <strong>{{ modelo.modelo }}</strong>.
+    {% if not modelo.usa_llm %}Para usar um LLM, defina SCIEVENT_LLM_URL e SCIEVENT_LLM_MODELO antes de iniciar (ver README).{% endif %}</p>
+
+  <div class="grade-2">
+  {% for p in papeis %}
+    <section class="cartao perfil-agente">
+      <h2>{{ p.nome }} <span class="mudo">· {{ p.papel }}</span></h2>
+      <p><b>Objetivo:</b> {{ p.objetivo }}</p>
+      <p><b>Restrições:</b> {{ p.restricoes }}</p>
+      <p class="pequeno">Assina <code>{{ p.assina|join(', ') }}</code> → publica <code>{{ p.publica }}</code></p>
+      <p class="pequeno mudo">Campos da mensagem: {{ p.campos|join(', ') }}</p>
+    </section>
+  {% endfor %}
+  </div>
+
+  <h2>Pool de mensagens ({{ mensagens|length }})</h2>
+  <p class="mudo pequeno">Publish-subscribe: quem publica não conhece quem consome. Cada resposta aponta a mensagem que a causou.</p>
+  <div class="pool">
+  {% for msg in mensagens[:30] %}
+    <article class="mensagem-pool">
+      <header><span class="selo selo-p">#{{ msg.id }} {{ msg.tipo }}</span>
+        <span class="pequeno">de <b>{{ msg.origem }}</b>{% if msg.causa_id %} · em resposta a #{{ msg.causa_id }}{% endif %}</span></header>
+      {% if msg.tipo == 'TriagemConcluida' %}<p>{{ msg.conteudo.resumo }}</p>
+      {% elif msg.tipo == 'MetaRevisaoConcluida' %}<p>{{ msg.conteudo.texto }}</p>
+      {% elif msg.tipo == 'SubmissaoRecebida' %}<p>#{{ msg.conteudo.submissao.id }} {{ msg.conteudo.submissao.titulo }}</p>
+      {% elif msg.tipo == 'RevisoesConcluidas' %}<p>#{{ msg.conteudo.submissao.id }} {{ msg.conteudo.submissao.titulo }} — {{ msg.conteudo.revisoes|length }} revisões, decisão: {{ msg.conteudo.decisao.status }}</p>
+      {% endif %}
+    </article>
+  {% else %}
+    <p class="mudo">Nenhuma mensagem ainda. Submeta um trabalho para acionar o agente de triagem.</p>
+  {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

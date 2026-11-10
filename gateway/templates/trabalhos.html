@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block titulo %}Trabalhos · {{ evento.sigla }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div>
+    <span class="etiqueta">Microsserviço <code>submissoes</code></span>
+    <h1>Trabalhos submetidos</h1>
+    <p class="mudo">{{ submissoes|length }} trabalhos, mais recentes primeiro. A coluna Triagem mostra o parecer do agente de IA, quando a aplicação usa o assistente.</p>
+  </div>
+  <a class="botao" href="{{ url_for('submeter', app_id=app_id) }}">Nova submissão</a>
+</div>
+
+<table class="tabela">
+  <thead><tr><th>#</th><th>Trabalho</th><th>Trilha</th><th>Status</th><th>Triagem (IA)</th></tr></thead>
+  <tbody>
+  {% for s in submissoes|reverse %}
+    <tr>
+      <td>{{ s.id }}</td>
+      <td><strong>{{ s.titulo }}</strong><br>
+          <span class="mudo pequeno">{{ s.autores|map(attribute='nome')|join(', ') }}</span><br>
+          <span class="chips">{% for k in s.palavras_chave %}<span class="chip chip-p">{{ k }}</span>{% endfor %}</span></td>
+      <td class="pequeno">{{ s.trilha or '—' }}</td>
+      <td><span class="selo selo-{{ s.status }}">{{ s.status|status }}</span>
+          {% if s.decisao and s.decisao.modalidade %}<br><span class="pequeno mudo">{{ s.decisao.modalidade|modalidade }}</span>{% endif %}</td>
+      <td class="pequeno">
+        {% if s.triagem %}
+          <div>{{ s.triagem.resumo }}</div>
+          {% for a in s.triagem.alertas %}<div class="alerta-ia">{{ a }}</div>{% endfor %}
+          <div class="mudo">por {{ s.triagem.gerado_por }}</div>
+        {% else %}<span class="mudo">—</span>{% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="mudo">Nenhum trabalho ainda.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

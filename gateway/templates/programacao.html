@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block titulo %}Programação · {{ evento.sigla }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div>
+    <span class="etiqueta">Template method <code>gerar_programacao()</code></span>
+    <h1>Programação</h1>
+    <p class="mudo">Gerador deste evento (componente <code>{{ aplicacao.gerador_programacao.nome }}</code>): {{ aplicacao.gerador_programacao.descricao() }}.</p>
+  </div>
+  <form method="post" action="{{ url_for('gerar_programacao', app_id=app_id) }}">
+    <button class="botao" {% if not aceitos %}disabled{% endif %}>{{ 'Gerar novamente' if programa else 'Gerar programação' }} ({{ aceitos }} aceitos)</button>
+  </form>
+</div>
+
+{% if programa %}
+<section class="cartao tentativas">
+  <h2>Gerar e verificar ({{ programa.tentativas|length }} tentativa{{ 's' if programa.tentativas|length > 1 }})</h2>
+  <ol>
+  {% for t in programa.tentativas %}
+    <li>{% if t.conflitos %}<span class="selo selo-rejeitado">{{ t.conflitos|length }} conflito(s)</span>
+          {% for c in t.conflitos %}<div class="pequeno mudo">{{ c }}</div>{% endfor %}
+        {% else %}<span class="selo selo-aceito">sem conflitos</span>{% endif %}</li>
+  {% endfor %}
+  </ol>
+  {% for o in programa.observacoes %}<p class="pequeno mudo">{{ o }} Publicada em {{ programa.publicado_em }}.</p>{% endfor %}
+</section>
+
+<div class="tabela-rolagem">
+<table class="tabela grade-programa">
+  <thead><tr><th>Horário</th>{% for sala in salas %}<th>{{ sala }}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for (inicio, fim), sessoes in grade %}
+    <tr><td class="horario">{{ inicio }}<br><span class="mudo">{{ fim }}</span></td>
+      {% for sala in salas %}
+        <td>{% if sessoes.get(sala) %}{% set se = sessoes[sala] %}
+          <div class="sessao"><strong>{{ se.titulo }}</strong>
+            {% for ap in se.apresentacoes %}
+              <div class="apresentacao"><span class="hora">{{ ap.inicio }}</span> {{ ap.titulo }}<br><span class="mudo">{{ ap.autores }}</span></div>
+            {% endfor %}</div>
+        {% endif %}</td>
+      {% endfor %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+  <p class="mudo">A programação ainda não foi gerada.</p>
+{% endif %}
+{% endblock %}

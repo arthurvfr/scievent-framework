@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block titulo %}Revisões · {{ evento.sigla }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div>
+    <span class="etiqueta">Template method <code>registrar_revisao()</code></span>
+    <h1>Revisões</h1>
+    <p class="mudo">Formulário deste evento (componente <code>{{ aplicacao.formulario.nome }}</code>): {{ aplicacao.formulario.descricao() }}.
+      {% if ocultar %}Revisão cega: o revisor não vê os autores.{% else %}Revisão aberta: o revisor vê os autores.{% endif %}</p>
+  </div>
+  <form method="post" action="{{ url_for('simular', app_id=app_id) }}">
+    <button class="botao botao-secundario" {% if not pendentes %}disabled{% endif %}>Simular {{ pendentes|length }} revisões pendentes</button>
+  </form>
+</div>
+
+<h2>Pendentes ({{ pendentes|length }})</h2>
+{% for a in pendentes %}
+  {% set s = submissoes[a.submissao_id] %}
+  <details class="cartao revisao" {% if loop.first %}open{% endif %}>
+    <summary><strong>#{{ s.id }} {{ s.titulo }}</strong> <span class="mudo">— revisor: {{ a.revisor_nome }}</span></summary>
+    <p class="pequeno">
+      {% if ocultar %}<span class="selo">autores ocultos</span>{% else %}Autores: {{ s.autores|map(attribute='nome')|join(', ') }}{% endif %}
+      · Trilha: {{ s.trilha or '—' }}</p>
+    <p class="resumo">{{ s.resumo }}</p>
+    <form method="post" action="{{ url_for('registrar_revisao', app_id=app_id, alocacao_id=a.id) }}" class="formulario">
+      <div class="criterios">
+        {% for c in criterios %}
+          <label>{{ c.rotulo }} <span class="mudo pequeno">({{ c.minimo }}–{{ c.maximo }}{% if criterios|length > 1 %}, peso {{ (c.peso * 100)|round|int }}%{% endif %})</span>
+            <input type="number" name="{{ c.chave }}" min="{{ c.minimo }}" max="{{ c.maximo }}" step="1" required title="{{ c.ajuda }}"></label>
+        {% endfor %}
+      </div>
+      <label>Comentário ao autor<textarea name="comentario" rows="3"></textarea></label>
+      <button class="botao">Registrar avaliação</button>
+    </form>
+  </details>
+{% else %}
+  <p class="mudo">Nenhuma revisão pendente.</p>
+{% endfor %}
+
+<h2>Entregues ({{ feitas|length }})</h2>
+<table class="tabela">
+  <thead><tr><th>Trabalho</th><th>Revisor</th><th>Respostas</th><th>Nota</th><th>Comentário</th></tr></thead>
+  <tbody>
+  {% for r in feitas %}
+    <tr><td>#{{ r.submissao_id }} {{ submissoes[r.submissao_id].titulo|truncate(48) }}</td>
+        <td>{{ r.revisor_nome }}</td>
+        <td class="pequeno">{% for k, v in r.respostas.items() %}{{ k }}={{ v }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+        <td><strong>{{ '%.2f'|format(r.nota) }}</strong></td>
+        <td class="pequeno">{{ r.comentario|truncate(90) }}</td></tr>
+  {% else %}<tr><td colspan="5" class="mudo">Nenhuma revisão entregue.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

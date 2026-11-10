@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block titulo %}Submeter · {{ evento.sigla }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div>
+    <span class="etiqueta">Template method <code>submeter_trabalho()</code></span>
+    <h1>Submeter trabalho</h1>
+    <p class="mudo">Regras deste evento (componente <code>{{ aplicacao.validador.nome }}</code>): {{ aplicacao.validador.descricao() }}.</p>
+  </div>
+</div>
+
+{% if erros %}
+<div class="aviso aviso-erro">
+  <strong>A submissão não atende às regras do evento:</strong>
+  <ul>{% for e in erros %}<li>{{ e }}</li>{% endfor %}</ul>
+  <p class="pequeno">A submissão foi barrada pelo componente <code>{{ aplicacao.validador.nome }}</code> antes de chegar ao microsserviço <code>submissoes</code>; por isso nenhum microsserviço foi chamado nesta tela.</p>
+</div>
+{% endif %}
+
+<form method="post" class="cartao formulario">
+  <label>Título<input name="titulo" value="{{ v.titulo or '' }}"></label>
+  <label>Resumo<textarea name="resumo" rows="6">{{ v.resumo or '' }}</textarea></label>
+  <div class="linha-2">
+    <label>Palavras-chave (separadas por vírgula)<input name="palavras_chave" value="{{ v.palavras_chave or '' }}"></label>
+    <label>Trilha
+      <select name="trilha">
+        <option value="">— escolha —</option>
+        {% for t in evento.trilhas %}<option {% if v.trilha == t.nome %}selected{% endif %}>{{ t.nome }}</option>{% endfor %}
+      </select>
+    </label>
+  </div>
+  <fieldset>
+    <legend>Autores</legend>
+    {% for i in range(3) %}
+    <div class="linha-3">
+      <input name="autor_nome_{{ i }}" placeholder="Nome do autor {{ i + 1 }}" value="{{ v['autor_nome_' ~ i] or '' }}">
+      <input name="autor_email_{{ i }}" placeholder="E-mail" value="{{ v['autor_email_' ~ i] or '' }}">
+      <input name="autor_inst_{{ i }}" placeholder="Instituição" value="{{ v['autor_inst_' ~ i] or '' }}">
+    </div>
+    {% endfor %}
+  </fieldset>
+  <button class="botao">Enviar submissão</button>
+</form>
+{% endblock %}

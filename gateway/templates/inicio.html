@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}Início{% endblock %}
+{% block conteudo %}
+<section class="hero">
+  <h1>Um framework, vários eventos científicos</h1>
+  <p>O <strong>SciEvent</strong> define o fluxo fixo de um evento (submissão, revisão, decisão,
+     programação e notificação) e deixa cada aplicação escolher os componentes de cada etapa.
+     Abaixo estão as duas aplicações construídas reusando o mesmo framework.</p>
+</section>
+
+<div class="grade-2">
+  {% for c in cards %}
+  <article class="cartao cartao-app tema-{{ c.id }}">
+    <header>
+      <span class="sigla-grande">{{ c.evento.sigla }}</span>
+      <span class="etiqueta">Aplicação {{ loop.index }} · <code>{{ c.classe }}</code></span>
+    </header>
+    <h2>{{ c.evento.nome }}</h2>
+    <p class="mudo">{{ c.evento.descricao }}</p>
+    <p class="mudo">{{ c.evento.local }} · {{ c.evento.data_inicio }}{% if c.evento.data_fim != c.evento.data_inicio %} a {{ c.evento.data_fim }}{% endif %}</p>
+    <table class="tabela compacta">
+      {% for comp in c.evento.componentes %}
+      <tr><td class="mudo">{{ comp.hotspot }}</td><td><code>{{ comp.componente }}</code></td></tr>
+      {% endfor %}
+    </table>
+    <a class="botao" href="{{ url_for('painel', app_id=c.id) }}">Abrir aplicação</a>
+  </article>
+  {% endfor %}
+</div>
+
+<section class="cartao">
+  <div class="cabecalho-secao">
+    <h2>Microsserviços em execução</h2>
+    <a href="{{ url_for('microservicos') }}">ver detalhes</a>
+  </div>
+  <div class="mapa-servicos">
+    {% for s in servicos %}
+      <div class="no-servico {% if not s.ativo %}inativo{% endif %}">
+        <strong>{{ s.nome }}</strong><span>:{{ s.porta }}</span>
+      </div>
+    {% else %}
+      <p class="mudo">O registro de serviços não respondeu.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

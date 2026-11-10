@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Dados e logs gerados ao rodar o sistema
+data/
+logs/
+*.db
+
+# Editores e sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

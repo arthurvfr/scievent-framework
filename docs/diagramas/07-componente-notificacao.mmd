@@ -1,0 +1,42 @@
+classDiagram
+    direction TB
+    class Componente {
+        <<abstract>>
+        +nome : str
+        +descricao()* str
+    }
+    class ICanalNotificacao {
+        <<interface>>
+        +canal* : str
+        +formatar(tipo: str, contexto: dict)* Mensagem
+    }
+    class NotificacaoEmail {
+        -remetente : str
+        +canal = "email"
+        +descricao() str
+        +formatar(tipo, contexto) Mensagem
+    }
+    class NotificacaoMural {
+        +canal = "mural"
+        +descricao() str
+        +formatar(tipo, contexto) Mensagem
+    }
+    class Mensagem {
+        +assunto : str
+        +corpo : str
+    }
+    class FrameworkEventoCientifico {
+        <<abstract>>
+        +criar_canal_notificacao()* ICanalNotificacao
+        -_notificar(tipo, destinatario, contexto)
+    }
+    class ClienteNotificacoes {
+        +enviar(dados) dict
+        +listar(evento_id) list
+    }
+    Componente <|-- ICanalNotificacao
+    ICanalNotificacao <|.. NotificacaoEmail
+    ICanalNotificacao <|.. NotificacaoMural
+    ICanalNotificacao ..> Mensagem : formata
+    FrameworkEventoCientifico o-- ICanalNotificacao : hotspot
+    FrameworkEventoCientifico --> ClienteNotificacoes : envia via microsserviço

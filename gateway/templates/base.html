@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}SciEvent{% endblock %} · SciEvent</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+</head>
+<body class="{% if app_id %}tema-{{ app_id }}{% endif %}">
+<header class="topo">
+  <a class="marca" href="{{ url_for('inicio') }}">
+    <span class="logo">SE</span>
+    <span><strong>SciEvent</strong><small>Framework para Eventos Científicos</small></span>
+  </a>
+  <nav>
+    <a href="{{ url_for('inicio') }}">Início</a>
+    {% for id, cls in aplicacoes.items() %}
+      <a href="{{ url_for('painel', app_id=id) }}" {% if app_id == id %}class="ativo"{% endif %}>App: {{ id }}</a>
+    {% endfor %}
+    <a href="{{ url_for('microservicos') }}">Microsserviços</a>
+    <a href="{{ url_for('indice_api') }}">API</a>
+  </nav>
+</header>
+
+<div class="corpo {% if aplicacao %}com-lateral{% endif %}">
+  {% if aplicacao %}
+  <aside class="lateral">
+    <div class="evento-id">
+      <span class="sigla">{{ evento.sigla }}</span>
+      <span class="nome-evento">{{ evento.nome }}</span>
+      <span class="classe">classe {{ aplicacao.__class__.__name__ }}</span>
+    </div>
+    <ol class="etapas">
+      {% for chave, rotulo in etapas %}
+        <li><a href="{{ url_for(chave, app_id=app_id) }}" {% if pagina == chave %}class="ativo"{% endif %}>
+          <span class="num">{{ loop.index0 if loop.index0 else '•' }}</span>{{ rotulo }}</a></li>
+      {% endfor %}
+    </ol>
+  </aside>
+  {% endif %}
+
+  <main>
+    <div class="servicos-tela" title="Microsserviços chamados para montar esta tela">
+      <span class="rotulo">Microsserviços usados nesta tela</span>
+      {% for s in servicos_da_tela %}
+        <span class="chip-servico">{{ s.nome }} <b>:{{ s.porta }}</b></span>
+      {% else %}
+        <span class="chip-vazio">nenhum</span>
+      {% endfor %}
+    </div>
+
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+      {% for categoria, texto in mensagens %}
+        <div class="aviso aviso-{{ categoria }}">{{ texto }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    {% block conteudo %}{% endblock %}
+  </main>
+</div>
+
+<footer class="rodape">SciEvent {{ versao }} · Framework com Microsserviços, Componentes de Software e Agentes de IA · Reuso de Software e Metodologias Ágeis</footer>
+</body>
+</html>

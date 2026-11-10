@@ -1,0 +1,40 @@
+classDiagram
+    direction TB
+    class Componente {
+        <<abstract>>
+        +nome : str
+        +descricao()* str
+    }
+    class IPoliticaDecisao {
+        <<interface>>
+        +decidir(submissao: dict, notas: list~float~)* Decisao
+    }
+    class DecisaoPorMediaPonderada {
+        -limiar_oral : float
+        -limiar_poster : float
+        -limiar_divergencia : float
+        +descricao() str
+        +decidir(submissao, notas) Decisao
+    }
+    class DecisaoPorNotaMinima {
+        -nota_minima : float
+        +descricao() str
+        +decidir(submissao, notas) Decisao
+    }
+    class Decisao {
+        +status : str
+        +modalidade : str
+        +media : float
+        +justificativa : str
+        +como_dict() dict
+    }
+    class FrameworkEventoCientifico {
+        <<abstract>>
+        +criar_politica_decisao()* IPoliticaDecisao
+        +consolidar_decisoes() list
+    }
+    Componente <|-- IPoliticaDecisao
+    IPoliticaDecisao <|.. DecisaoPorMediaPonderada
+    IPoliticaDecisao <|.. DecisaoPorNotaMinima
+    IPoliticaDecisao ..> Decisao : retorna
+    FrameworkEventoCientifico o-- IPoliticaDecisao : hotspot

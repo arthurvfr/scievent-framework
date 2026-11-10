@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Notificações · {{ evento.sigla }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div>
+    <span class="etiqueta">Microsserviço <code>notificacoes</code></span>
+    <h1>Notificações enviadas</h1>
+    <p class="mudo">Canal deste evento (componente <code>{{ aplicacao.canal_notificacao.nome }}</code>): {{ aplicacao.canal_notificacao.descricao() }}.
+      {{ notificacoes|length }} mensagens, mais recentes primeiro.</p>
+  </div>
+</div>
+
+<div class="lista-notificacoes">
+{% for n in notificacoes %}
+  <article class="cartao notificacao">
+    <header><span class="selo">{{ n.canal }}</span> <span class="selo selo-p">{{ n.tipo }}</span>
+      <span class="mudo pequeno">para {{ n.destinatario }} · {{ n.enviado_em|replace('T', ' ') }}</span></header>
+    <strong>{{ n.assunto }}</strong>
+    <pre>{{ n.corpo }}</pre>
+  </article>
+{% else %}
+  <p class="mudo">Nenhuma notificação enviada.</p>
+{% endfor %}
+</div>
+{% endblock %}
